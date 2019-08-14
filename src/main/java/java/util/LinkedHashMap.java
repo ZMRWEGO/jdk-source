@@ -156,10 +156,13 @@ import java.util.function.Consumer;
  * @see TreeMap
  * @see Hashtable
  * @since 1.4
+ *
+ *
  */
 public class LinkedHashMap<K, V> extends HashMap<K, V> implements Map<K, V> {
     
     /*
+
      * Implementation note.  A previous version of this class was
      * internally structured a little differently. Because superclass
      * HashMap now uses trees for some of its nodes, class
@@ -281,7 +284,12 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> implements Map<K, V> {
         this.transferLinks(q, t);
         return t;
     }
-    
+    //put方法使用的还是HashMap的put方法
+    @Override
+    public V put(K key, V value) {
+        return super.put(key, value);
+    }
+
     @Override
     void afterNodeRemoval(Node<K, V> e) { // unlink
         LinkedHashMap.Entry<K, V> p =
