@@ -356,6 +356,9 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> implements Map<K, V> {
      * @param loadFactor      the load factor
      * @throws IllegalArgumentException if the initial capacity is negative
      *                                  or the load factor is nonpositive
+     *
+     *
+     *  默认情况下，按元素的插入顺序维护链表的顺序，accessOrder=false
      */
     public LinkedHashMap(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
@@ -408,6 +411,9 @@ public class LinkedHashMap<K, V> extends HashMap<K, V> implements Map<K, V> {
      *                        access-order, <tt>false</tt> for insertion-order
      * @throws IllegalArgumentException if the initial capacity is negative
      *                                  or the load factor is nonpositive
+     *
+     *     指定 accessOrder 参数为 true，即可让它按访问顺序维护链表。访问顺序的原理上并不复杂，
+     *     当我们调用get/getOrDefault/replace等方法时，只需要将这些方法访问的节点移动到链表的尾部即可
      */
     public LinkedHashMap(int initialCapacity,
                          float loadFactor,
