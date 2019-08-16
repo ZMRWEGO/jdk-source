@@ -237,7 +237,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
     /**
      * The maximum capacity, used if a higher value is implicitly specified
      * by either of the constructors with arguments.
-     * MUST be a power of two <= 1<<30.
+     * MUST be a power of two <= 1<<30.  必须定义为2的幂
      */
     static final int MAXIMUM_CAPACITY = 1 << 30;
     
@@ -253,6 +253,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * than 2 and should be at least 8 to mesh with assumptions in
      * tree removal about conversion back to plain bins upon
      * shrinkage.
+     * 链表长度大于8时 转化为红黑树
      */
     static final int TREEIFY_THRESHOLD = 8;
     
@@ -260,6 +261,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * The bin count threshold for untreeifying a (split) bin during a
      * resize operation. Should be less than TREEIFY_THRESHOLD, and at
      * most 6 to mesh with shrinkage detection under removal.
+     * bin小于6时，转化为链表
      */
     static final int UNTREEIFY_THRESHOLD = 6;
     
@@ -268,6 +270,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * (Otherwise the table is resized if too many nodes in a bin.)
      * Should be at least 4 * TREEIFY_THRESHOLD to avoid conflicts
      * between resizing and treeification thresholds.
+     *
+     * 数组容量在大于64时才进行树化
      */
     static final int MIN_TREEIFY_CAPACITY = 64;
     
@@ -345,9 +349,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
      * cheapest possible way to reduce systematic lossage, as well as
      * to incorporate impact of the highest bits that would otherwise
      * never be used in index calculations because of table bounds.
-     */
+     * 在key的HashCode的基础上再hash
+     * */
     static final int hash(Object key) {
         int h;
+        //与其高16位进行异或
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
     
@@ -667,6 +673,8 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         if ((tab = this.table) == null || (n = tab.length) == 0) {
             n = (tab = this.resize()).length;
         }
+        //hash值对n取模 即(n-1)&hash
+        //这里注意：但是位运算只能用于除数是2的n次方的数的求余 所以n必须是2的幂
         if ((p = tab[i = (n - 1) & hash]) == null) {
             tab[i] = this.newNode(hash, key, value, null);
         } else {
@@ -704,9 +712,11 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             }
         }
         ++this.modCount;
+        //插入成功之后再判断是否扩容
         if (++this.size > this.threshold) {
             this.resize();
         }
+        //该方法在LinkedHashMap中覆写 用来决定是否删除链表中最老的节点
         this.afterNodeInsertion(evict);
         return null;
     }
@@ -730,6 +740,7 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             if (oldCap >= MAXIMUM_CAPACITY) {
                 this.threshold = Integer.MAX_VALUE;
                 return oldTab;
+                //初始化为原来的2倍
             } else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
                     oldCap >= DEFAULT_INITIAL_CAPACITY) {
                 newThr = oldThr << 1; // double threshold
